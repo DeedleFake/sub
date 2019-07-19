@@ -57,6 +57,10 @@ func (c *Commander) Flags(flags func(*flag.FlagSet)) {
 // Run runs the commander against the given arguments. The first
 // argument should be the name of the executable. In many cases, this
 // should be filepath.Base(os.Args[0]).
+//
+// If there is a problem with args, such as an attempt to call a
+// non-existent command, flag.ErrHelp is returned. Otherwise, any
+// errors returned from subcommand's Run method are returned directly.
 func (c *Commander) Run(args []string) error {
 	c.name = args[0]
 
@@ -164,7 +168,7 @@ func (h *helpCmd) Run(args []string) error {
 
 		fmt.Fprintf(os.Stderr, "Usage: %v%v <subcommand> [subcommand arguments]\n", name, globalOptions)
 		if c.help != "" {
-			fmt.Fprintf(os.Stderr, "\n%v\n", c.help)
+			fmt.Fprintf(os.Stderr, "\n%v\n", strings.TrimSpace(c.help))
 		}
 		if c.flags != nil {
 			fmt.Fprintf(os.Stderr, "\nGlobal Options:\n")
@@ -182,12 +186,14 @@ func (h *helpCmd) Run(args []string) error {
 
 	cmd := c.get(args[0])
 	if cmd == nil {
-		fmt.Fprintf(os.Stderr, "Error: No such command: %q\n\n", args[0])
+		fmt.Fprintf(os.Stderr, "Error: No such command: %q\n", args[0])
 		_ = h.Run(nil)
 		return flag.ErrHelp
 	}
 
-	fmt.Fprintf(os.Stderr, strings.TrimSpace(cmd.Help())+"\n")
+	if cmd.Help() != "" {
+		fmt.Fprintf(os.Stderr, "\n%v\n", strings.TrimSpace(cmd.Help()))
+	}
 	fset := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
 	cmd.Flags(fset)
 	if fset.NFlag() > 0 {
