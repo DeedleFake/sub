@@ -186,13 +186,13 @@ func (h *helpCmd) Run(args []string) error {
 
 	cmd := c.get(args[0])
 	if cmd == nil {
-		fmt.Fprintf(os.Stderr, "Error: No such command: %q\n", args[0])
+		fmt.Fprintf(os.Stderr, "Error: No such command: %q\n\n", args[0])
 		_ = h.Run(nil)
 		return flag.ErrHelp
 	}
 
 	if cmd.Help() != "" {
-		fmt.Fprintf(os.Stderr, "\n%v\n", strings.TrimSpace(cmd.Help()))
+		fmt.Fprintf(os.Stderr, "%v\n", strings.TrimSpace(cmd.Help()))
 	}
 	fset := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
 	cmd.Flags(fset)
