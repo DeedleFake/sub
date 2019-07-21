@@ -1,8 +1,10 @@
 package sub
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -194,11 +196,15 @@ func (h *helpCmd) Run(args []string) error {
 	if cmd.Help() != "" {
 		fmt.Fprintf(os.Stderr, "%v\n", strings.TrimSpace(cmd.Help()))
 	}
+
+	var optionBuf bytes.Buffer
 	fset := flag.NewFlagSet(cmd.Name(), flag.ContinueOnError)
+	fset.SetOutput(&optionBuf)
 	cmd.Flags(fset)
-	if fset.NFlag() > 0 {
+	fset.PrintDefaults()
+	if optionBuf.Len() > 0 {
 		fmt.Fprintf(os.Stderr, "\nOptions:\n")
-		fset.PrintDefaults()
+		_, _ = io.Copy(os.Stderr, &optionBuf)
 	}
 
 	return nil
