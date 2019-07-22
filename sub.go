@@ -1,3 +1,28 @@
+// Package sub provides a subcommand parsing wrapper for the flag package.
+//
+// This package is designed to be very minimal and simple to use. Just
+// create a Commander, register some commands, and run it.
+//
+// For example:
+//
+//    var c sub.Commander
+//
+//    c.Register(c.HelpCmd())
+//    c.Help = `This is just a simple example for documentation purposes.`
+//
+//    c.Register(&someExampleCmd{})
+//    c.Register(&anotherOne{})
+//
+//    os.Args[0] = filepath.Base(os.Args[0])
+//    err := c.Run(os.Args)
+//    if err != nil {
+//      if err == flag.ErrHelp {
+//        os.Exit(2)
+//      }
+//
+//      fmt.Fprintf(os.Stderr, "Error: %v", err)
+//      os.Exit(1)
+//    }
 package sub
 
 import (
