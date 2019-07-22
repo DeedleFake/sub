@@ -32,7 +32,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 )
 
@@ -66,15 +65,14 @@ func (c *Commander) output() io.Writer {
 // Register registers a command with the Commander. If a command with
 // the same name as cmd already exists, it is replaced with cmd.
 func (c *Commander) Register(cmd Command) {
-	i := sort.Search(len(c.commands), func(i int) bool {
-		return cmd.Name() < c.commands[i].Name()
-	})
-	if (i < len(c.commands)) && (cmd.Name() == c.commands[i].Name()) {
-		c.commands[i] = cmd
-		return
+	for i := range c.commands {
+		if c.commands[i].Name() == cmd.Name() {
+			c.commands[i] = cmd
+			return
+		}
 	}
 
-	c.commands = append(c.commands[:i], append([]Command{cmd}, c.commands[i:]...)...)
+	c.commands = append(c.commands, cmd)
 }
 
 func (c *Commander) get(name string) Command {
